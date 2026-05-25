@@ -66,6 +66,13 @@ def index():
         .limit(5)
     )
 
+    # ── Support Tickets with Admin Replies ─────────────────────────────────
+    support_tickets = list(
+        db.complaints.find({"user_id": user_id, "admin_reply": {"$ne": ""}})
+        .sort("updated_at", -1)
+        .limit(5)
+    )
+
     return render_template(
         "user/dashboard.html",
         user=user,
@@ -80,6 +87,7 @@ def index():
         type_counts=type_counts,
         fraud_proba_data=fraud_proba_data,
         notifications=notifications,
+        support_tickets=support_tickets,
         unread_count=len(notifications),
         now=datetime.utcnow(),
     )

@@ -95,41 +95,31 @@
   <div class="row g-3 mb-4">
     <div class="col-lg-8">
       <div class="row g-3 h-100">
-        <div class="col-md-4">
+        <!-- Stats Cards with Mini Indicators -->
+        <div class="col-md-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift-sm">
-            <div class="d-flex align-items-center gap-3">
-              <div class="icon-circle bg-success-soft">
-                <i class="bi bi-arrow-down-circle text-success fs-5"></i>
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Total Deposits</div>
+                <div class="fw-black" style="font-size:1.4rem;font-family:'Plus Jakarta Sans',sans-serif;color:var(--bs-success);">₹{{ "{:,.0f}".format(total_deposits) }}</div>
+                <div style="font-size:0.75rem;color:#10b981;margin-top:0.25rem;"><i class="bi bi-arrow-up-right me-1"></i>Incoming</div>
               </div>
-              <div>
-                <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Deposits</div>
-                <div class="fw-black" style="font-size:1.1rem;">₹{{ "{:,.0f}".format(total_deposits) }}</div>
+              <div class="rounded-2 p-2" style="background:#d1fae5;flex-shrink:0;">
+                <i class="bi bi-arrow-down-circle text-success" style="font-size:1.1rem;"></i>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift-sm">
-            <div class="d-flex align-items-center gap-3">
-              <div class="icon-circle bg-primary-soft">
-                <i class="bi bi-arrow-up-right-circle text-primary fs-5"></i>
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Total Transfers</div>
+                <div class="fw-black" style="font-size:1.4rem;font-family:'Plus Jakarta Sans',sans-serif;color:var(--bs-primary);">₹{{ "{:,.0f}".format(total_transfers) }}</div>
+                <div style="font-size:0.75rem;color:#3b82f6;margin-top:0.25rem;"><i class="bi bi-arrow-down me-1"></i>Outgoing</div>
               </div>
-              <div>
-                <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Transfers</div>
-                <div class="fw-black" style="font-size:1.1rem;">₹{{ "{:,.0f}".format(total_transfers) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card border-0 shadow-sm rounded-4 p-3 h-100 hover-lift-sm">
-            <div class="d-flex align-items-center gap-3">
-              <div class="icon-circle bg-danger-soft">
-                <i class="bi bi-percent text-danger fs-5"></i>
-              </div>
-              <div>
-                <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Fraud Rate</div>
-                <div class="fw-black" style="font-size:1.1rem;">{{ "%.1f"|format(fraud_count/total_txns*100) if total_txns else 0 }}%</div>
+              <div class="rounded-2 p-2" style="background:#dbeafe;flex-shrink:0;">
+                <i class="bi bi-arrow-up-right-circle text-primary" style="font-size:1.1rem;"></i>
               </div>
             </div>
           </div>
@@ -144,9 +134,35 @@
             <canvas id="monthlyChart" height="100"></canvas>
           </div>
         </div>
+        <!-- Fraud Probability Chart -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2 text-danger"></i>Fraud Probability — Last 10 Transactions</h6>
+              <span class="badge bg-danger-soft text-danger" style="font-size:0.72rem;">ML Analysis</span>
+            </div>
+            <canvas id="fraudProbaChart" height="80"></canvas>
+          </div>
+        </div>
       </div>
     </div>
     <div class="col-lg-4">
+      <!-- Fraud Rate Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-3 mb-3" style="background:linear-gradient(135deg,#fff5f5,#ffe4e6);border:1.5px solid #fecaca;">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="text-muted" style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.25rem;">Fraud Rate</div>
+            <div class="fw-black" style="font-size:1.8rem;font-family:'Plus Jakarta Sans',sans-serif;color:#dc2626;">{{ "%.1f"|format(fraud_count/total_txns*100) if total_txns else 0 }}%</div>
+            <div style="font-size:0.7rem;color:#991b1b;margin-top:0.25rem;"><i class="bi bi-{{ 'shield-check' if fraud_count/total_txns*100 < 5 else 'exclamation-triangle' }} me-1"></i>{{ "Safe" if fraud_count/total_txns*100 < 5 else "Monitor" if fraud_count/total_txns*100 < 15 else "Risk" }}</div>
+          </div>
+          <div class="rounded-2 p-2" style="background:#fee2e2;flex-shrink:0;">
+            <i class="bi bi-percent text-danger" style="font-size:1.1rem;"></i>
+          </div>
+        </div>
+        <div class="progress mt-2" style="height:5px;border-radius:99px;background:#fecaca;">
+          <div class="progress-bar bg-danger" style="width:{{ fraud_count/total_txns*100 if total_txns else 0 }}%;border-radius:99px;"></div>
+        </div>
+      </div>
       <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
         <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Transaction Types</h6>
         <canvas id="typeChart" height="160"></canvas>
@@ -160,66 +176,6 @@
           </div>
           {% endfor %}
         </div>
-      </div>
-      <div class="card border-0 shadow-sm rounded-4 p-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-lightning-fill me-2 text-warning"></i>Quick Actions</h6>
-        <div class="row g-2">
-          {% for url, icon, color, label in [
-            (url_for('transactions.deposit'),'bi-arrow-down-circle-fill','success','Deposit'),
-            (url_for('transactions.transfer'),'bi-arrow-right-circle-fill','primary','Transfer'),
-            (url_for('transactions.history'),'bi-clock-history','info','History'),
-            (url_for('complaints.new_complaint'),'bi-chat-dots-fill','warning','Support')
-          ] %}
-          <div class="col-6">
-            <a href="{{ url }}" class="quick-action-btn">
-              <div class="btn-icon bg-{{ color }}-soft">
-                <i class="bi {{ icon }} text-{{ color }} fs-5"></i>
-              </div>
-              <span style="font-size:0.78rem;">{{ label }}</span>
-            </a>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ FRAUD PROBABILITY CHART + NOTIFICATIONS ══ -->
-  <div class="row g-4 mb-4">
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm rounded-4 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2 text-danger"></i>Fraud Probability — Last 10 Transactions</h6>
-          <span class="badge bg-danger-soft text-danger" style="font-size:0.72rem;">ML Analysis</span>
-        </div>
-        <canvas id="fraudProbaChart" height="80"></canvas>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-bold mb-0"><i class="bi bi-bell-fill me-2 text-warning"></i>Notifications</h6>
-          {% if notifications %}
-          <button class="btn btn-xs btn-outline-secondary rounded-pill" onclick="markNotificationsRead()">Mark all read</button>
-          {% endif %}
-        </div>
-        {% if notifications %}
-          {% for notif in notifications %}
-          <div class="notif-item mb-2 {{ 'unread' if not notif.read }}">
-            <div class="d-flex gap-2 align-items-start">
-              <div class="icon-circle-sm flex-shrink-0 bg-{{ 'danger-soft' if notif.type=='fraud' else 'primary-soft' if notif.type=='login' else 'success-soft' }}">
-                <i class="bi bi-{{ 'exclamation-triangle-fill' if notif.type=='fraud' else 'box-arrow-in-right' if notif.type=='login' else 'check-circle-fill' }} text-{{ 'danger' if notif.type=='fraud' else 'primary' if notif.type=='login' else 'success' }}" style="font-size:0.75rem;"></i>
-              </div>
-              <div class="small text-muted" style="line-height:1.5;">{{ notif.message[:90] }}</div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="text-center py-4 text-muted">
-            <i class="bi bi-bell-slash fs-2 d-block mb-2 opacity-50"></i>
-            <div style="font-size:0.85rem;">No new notifications</div>
-          </div>
-        {% endif %}
       </div>
     </div>
   </div>

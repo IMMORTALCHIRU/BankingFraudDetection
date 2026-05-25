@@ -71,6 +71,26 @@ def create_app():
     app.register_blueprint(complaints_bp)
     app.register_blueprint(profile_bp)
 
+    # ── Jinja2 Filters ────────────────────────
+    from datetime import datetime, timezone, timedelta
+    
+    def format_ist(dt):
+        """Convert UTC datetime to IST format."""
+        if not dt:
+            return "N/A"
+        try:
+            # If dt is naive, assume it's UTC
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            # Convert to IST (UTC+5:30)
+            ist = timezone(timedelta(hours=5, minutes=30))
+            ist_dt = dt.astimezone(ist)
+            return ist_dt.strftime('%d %b %Y, %I:%M %p IST')
+        except Exception:
+            return str(dt)
+    
+    app.jinja_env.filters['format_ist'] = format_ist
+
     # ── Root route ────────────────────────────
     @app.route("/")
     def index():
