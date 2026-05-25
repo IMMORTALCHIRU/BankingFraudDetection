@@ -1,0 +1,62 @@
+{
+    "training_date": "2026-05-26T00:32:22.086587",
+    "classification_task": {
+        "model_type": "RandomForest",
+        "accuracy": 1.0,
+        "auc_score": 1.0,
+        "rf_accuracy": 1.0,
+        "rf_auc": 1.0,
+        "xgb_accuracy": 1.0,
+        "xgb_auc": 1.0,
+        "features": [
+            "transaction_time",
+            "transaction_amount",
+            "avg_transaction_30d",
+            "transaction_frequency_10min",
+            "current_location",
+            "previous_location",
+            "account_balance",
+            "transaction_type",
+            "account_age_days",
+            "failed_login_attempts",
+            "login_hour",
+            "transactions_today"
+        ]
+    },
+    "regression_task": {
+        "model_type": "XGBoost",
+        "rmse": 2.9944115085084078,
+        "r2_score": 0.9958717226982117,
+        "mae": 1.434043288230896,
+        "rf_rmse": 3.1782416826347606,
+        "rf_r2": 0.9953492769610229,
+        "rf_mae": 1.5088261337348543,
+        "xgb_rmse": 2.9944115085084078,
+        "xgb_r2": 0.9958717226982117,
+        "xgb_mae": 1.434043288230896,
+        "features": [
+            "transaction_time",
+            "transaction_amount",
+            "avg_transaction_30d",
+            "transaction_frequency_10min",
+            "current_location",
+            "previous_location",
+            "account_balance",
+            "transaction_type",
+            "account_age_days",
+            "failed_login_attempts",
+            "login_hour",
+            "transactions_today"
+        ]
+    },
+    "preprocessing": {
+        "categorical_columns": [
+            "transaction_time",
+            "current_location",
+            "previous_location",
+            "transaction_type"
+        ],
+        "scaler_type": "StandardScaler",
+        "train_test_split": 0.2
+    }
+}
