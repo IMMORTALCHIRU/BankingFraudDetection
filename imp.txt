@@ -1,0 +1,6 @@
+SECRET_KEY=bfd-super-secret-key-banking-2024-secure
+DEBUG=False
+MONGO_URI=mongodb://localhost:27017/
+MONGO_DB=BankingFraudDB
+MAIL_USERNAME=bhavanimutagar7@gmail.com
+MAIL_PASSWORD=natqxjssmkwyfyxx

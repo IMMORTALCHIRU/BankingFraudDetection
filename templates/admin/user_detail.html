@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}User Detail — Admin{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-4{% endblock %}
+{% block content %}
+
+<!-- Admin Page Header -->
+<div class="admin-page-header">
+  <div class="container-fluid px-3 px-md-4">
+    <div class="d-flex align-items-center gap-3">
+      <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-light rounded-pill text-dark opacity-75 me-1"><i class="bi bi-arrow-left"></i></a>
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="admin-badge">ADMIN PANEL</span>
+        </div>
+        <h2 class="fw-black mb-0" style="font-family:'Plus Jakarta Sans',sans-serif;">User Detail</h2>
+        <p class="mb-0 mt-1" style="opacity:0.65;font-size:0.875rem;">Full profile, transactions and fraud history</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="row g-4">
+
+    <!-- Profile Summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4 text-center" style="border-radius:1.25rem;overflow:hidden;">
+        <div class="py-4 px-3" style="background:var(--grad-dark);">
+          <div class="avatar-circle mx-auto mb-3 text-white fw-black" style="width:80px;height:80px;font-size:2rem;background:var(--grad-primary);">{{ user.full_name[0].upper() }}</div>
+          <h5 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">{{ user.full_name }}</h5>
+          <div class="text-white-50 small mb-2">{{ user.email }}</div>
+          <div class="font-monospace small text-white bg-white-15 rounded-pill d-inline-block px-3 py-1" style="background:rgba(255,255,255,0.12);">{{ user.account_number }}</div>
+          <div class="mt-3">
+            {% if user.account_status == "Unverified" %}<span class="badge bg-warning text-dark">Unverified</span>
+            {% elif user.account_status == "Frozen" %}<span class="badge bg-danger">Frozen</span>
+            {% else %}<span class="badge bg-success">Active</span>{% endif %}
+          </div>
+        </div>
+        <div class="px-4 py-3 bg-white">
+          <div class="rounded-3 p-3 mb-3" style="background:#f0f4ff;">
+            <div class="fw-black fs-4 text-gradient">₹{{ "{:,.2f}".format(user.balance) }}</div>
+            <div class="text-muted small">Account Balance</div>
+          </div>
+          <div class="d-flex gap-2 justify-content-center">
+            <form method="POST" action="{{ url_for('admin.freeze_user', user_id=user._id|string) }}" onsubmit="return confirm('Confirm?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-sm btn-{{ 'success' if user.account_status=='Frozen' else 'warning' }} rounded-pill px-3">
+                <i class="bi bi-{{ 'unlock' if user.account_status=='Frozen' else 'lock' }} me-1"></i>
+                {{ 'Unfreeze' if user.account_status=='Frozen' else 'Freeze' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm bg-white" style="border-radius:1.25rem;">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-3 text-muted text-uppercase" style="font-size:0.72rem;letter-spacing:0.08em;">Account Info</h6>
+          {% for label, val in [('City', user.city), ('Phone', user.phone or '—'), ('Joined', user.created_at.strftime('%d %b %Y') if user.created_at), ('Last Login', user.last_login.strftime('%d %b %Y, %H:%M') if user.last_login)] %}
+          <div class="d-flex justify-content-between py-2 small" style="border-bottom:1px solid #f1f5f9;">
+            <span class="text-muted">{{ label }}</span>
+            <span class="fw-semibold">{{ val }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions + Fraud Alerts + Complaints -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm" style="border-radius:1.25rem;overflow:hidden;">
+        <div class="px-4 pt-4 pb-0 bg-white">
+          <ul class="nav nav-tabs border-0" id="userTabs" style="gap:0.5rem;">
+            <li class="nav-item">
+              <a class="nav-link active rounded-pill px-4 py-2" data-bs-toggle="tab" href="#txns"
+                 style="font-size:0.875rem;font-weight:600;border:0;background:transparent;">
+                <i class="bi bi-arrow-left-right me-1"></i>Transactions
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link rounded-pill px-4 py-2" data-bs-toggle="tab" href="#fraudTab"
+                 style="font-size:0.875rem;font-weight:600;border:0;background:transparent;">
+                <i class="bi bi-exclamation-triangle me-1"></i>Fraud Alerts
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link rounded-pill px-4 py-2" data-bs-toggle="tab" href="#complaintsTab"
+                 style="font-size:0.875rem;font-weight:600;border:0;background:transparent;">
+                <i class="bi bi-chat-dots me-1"></i>Complaints
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content">
+
+          <!-- Transactions Tab -->
+          <div class="tab-pane fade show active" id="txns">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8fafc;">
+                  <tr>
+                    <th class="ps-4 py-3 text-muted fw-semibold small">Date</th>
+                    <th class="py-3 text-muted fw-semibold small">Amount</th>
+                    <th class="py-3 text-muted fw-semibold small">Type</th>
+                    <th class="py-3 text-muted fw-semibold small">Fraud</th>
+                    <th class="py-3 text-muted fw-semibold small">Risk</th>
+                    <th class="py-3 text-muted fw-semibold small">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for txn in transactions %}
+                  <tr>
+                    <td class="ps-4 text-muted small">{{ txn.timestamp.strftime('%d %b %Y') if txn.timestamp }}</td>
+                    <td class="fw-bold text-primary small">₹{{ "{:,.0f}".format(txn.amount) }}</td>
+                    <td><span class="badge bg-primary-soft text-primary small">{{ txn.transaction_type }}</span></td>
+                    <td><span class="badge bg-{{ 'danger' if txn.fraud_prediction=='Fraud' else 'success' }} small">{{ txn.fraud_prediction }}</span></td>
+                    <td class="small fw-bold text-{{ 'danger' if txn.risk_score >= 60 else 'warning' if txn.risk_score >= 35 else 'success' }}">{{ "%.0f"|format(txn.risk_score) }}</td>
+                    <td><span class="badge bg-{{ 'success' if txn.status=='Completed' else 'warning text-dark' if txn.status=='Pending' else 'danger' }}">{{ txn.status }}</span></td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="6" class="text-center text-muted py-4">No transactions found</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Fraud Alerts Tab -->
+          <div class="tab-pane fade" id="fraudTab">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8fafc;">
+                  <tr>
+                    <th class="ps-4 py-3 text-muted fw-semibold small">Date</th>
+                    <th class="py-3 text-muted fw-semibold small">Amount</th>
+                    <th class="py-3 text-muted fw-semibold small">Risk Level</th>
+                    <th class="py-3 text-muted fw-semibold small">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for a in fraud_alerts %}
+                  <tr>
+                    <td class="ps-4 text-muted small">{{ a.timestamp.strftime('%d %b %Y') if a.timestamp else 'N/A' }}</td>
+                    <td class="fw-bold text-danger small">₹{{ "{:,.0f}".format(a.amount|default(0)) }}</td>
+                    <td><span class="badge bg-danger small">{{ a.risk_level|default('Low') }}</span></td>
+                    <td class="small">{{ "%.1f"|format((a.confidence|default(0))) }}%</td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="4" class="text-center text-muted py-4">No fraud alerts</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Complaints Tab -->
+          <div class="tab-pane fade" id="complaintsTab">
+            <div class="p-4">
+              {% for c in complaints %}
+              <div class="rounded-3 p-3 mb-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <span class="fw-semibold small">{{ c.subject }}</span>
+                  <span class="badge bg-{{ 'success' if c.status=='Resolved' else 'warning text-dark' }}">{{ c.status }}</span>
+                </div>
+                <div class="text-muted small">{{ c.description[:100] }}{% if c.description|length > 100 %}…{% endif %}</div>
+              </div>
+              {% else %}
+              <div class="text-center text-muted py-4">No complaints found</div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP — BankGuard{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<div class="auth-bg-overlay"></div>
+<div class="auth-wrapper d-flex align-items-center justify-content-center" style="min-height:100vh;padding:1rem;">
+  <div style="width:100%;max-width:440px;position:relative;z-index:2;">
+    <div class="card border-0 shadow-xl rounded-5 overflow-hidden" style="box-shadow:var(--shadow-xl)!important;">
+      <!-- Header -->
+      <div class="text-white text-center py-5 px-4 position-relative" style="background:var(--grad-dark);z-index:2;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(79,70,229,0.4) 0%,transparent 70%);"></div>
+        <div class="position-relative" style="z-index:2;">
+          <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:var(--grad-warning);border-radius:50%;box-shadow:0 8px 24px rgba(245,158,11,0.4);">
+            <i class="bi bi-envelope-check-fill" style="font-size:1.8rem;color:#fff;"></i>
+          </div>
+          <h3 class="fw-black mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Verify Your Email</h3>
+          <p style="opacity:0.65;font-size:0.875rem;margin:0;">We sent a 4-digit OTP to<br/><strong style="color:#fbbf24;">{{ email }}</strong></p>
+        </div>
+      </div>
+      <!-- Form -->
+      <div class="card-body p-4 p-md-5 bg-white">
+        <form method="POST" action="{{ url_for('auth.verify_otp') }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="mb-4 text-center">
+            <label class="form-label fw-semibold mb-3">Enter 4-Digit OTP</label>
+            <div class="d-flex justify-content-center gap-3 mt-2">
+              <input type="text" class="otp-box" maxlength="1" id="otp1" inputmode="numeric"/>
+              <input type="text" class="otp-box" maxlength="1" id="otp2" inputmode="numeric"/>
+              <input type="text" class="otp-box" maxlength="1" id="otp3" inputmode="numeric"/>
+              <input type="text" class="otp-box" maxlength="1" id="otp4" inputmode="numeric"/>
+            </div>
+            <input type="hidden" name="otp" id="otpHidden"/>
+          </div>
+          <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);">
+              <i class="bi bi-clock text-danger" style="font-size:0.85rem;"></i>
+              <span style="font-size:0.82rem;color:var(--dark-2);">OTP expires in <span id="otpCountdown" class="fw-bold text-danger">5:00</span></span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-pill">
+            <i class="bi bi-check-circle-fill me-2"></i>Verify Account
+          </button>
+        </form>
+        <div class="text-center mt-4">
+          <span class="text-muted small">Didn't receive OTP? </span>
+          <a href="{{ url_for('auth.resend_otp') }}" class="fw-semibold text-primary small text-decoration-none">Resend OTP</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('auth.login') }}" class="text-decoration-none" style="color:rgba(255,255,255,0.6);font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Sign In</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const boxes = ['otp1','otp2','otp3','otp4'];
+boxes.forEach((id,i) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    if (el.value && i < 3) document.getElementById(boxes[i+1]).focus();
+    document.getElementById('otpHidden').value = boxes.map(b => document.getElementById(b).value).join('');
+  });
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !el.value && i > 0) document.getElementById(boxes[i-1]).focus();
+  });
+});
+let secs = 300;
+const countEl = document.getElementById('otpCountdown');
+const timer = setInterval(() => {
+  secs--;
+  if (secs <= 0) { clearInterval(timer); countEl.textContent = 'Expired'; return; }
+  const m = Math.floor(secs/60), s = secs%60;
+  countEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}, 1000);
+</script>
+{% endblock %}
+

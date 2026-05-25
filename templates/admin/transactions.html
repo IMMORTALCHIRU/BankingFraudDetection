@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}All Transactions — Admin{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="admin-page-header mb-4">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="admin-badge mb-2"><i class="bi bi-arrow-left-right me-1"></i>TRANSACTIONS</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">All Transactions</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">{{ total }} total transactions</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm fw-semibold rounded-pill px-3" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:#fff;">
+          <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search user / txn ID" value="{{ filters.search or '' }}"/>
+      </div>
+      <div class="col-md-2">
+        <select name="risk" class="form-select">
+          <option value="">All Risk</option>
+          {% for r in ['Low','Medium','High','Critical'] %}
+          <option value="{{ r }}" {{ 'selected' if filters.risk==r }}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="fraud" class="form-select">
+          <option value="">All</option>
+          <option value="Fraud" {{ 'selected' if filters.fraud=='Fraud' }}>Fraud Only</option>
+          <option value="Normal" {{ 'selected' if filters.fraud=='Normal' }}>Normal Only</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel"></i></button>
+        <a href="{{ url_for('admin.transactions') }}" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Date</th>
+              <th>User</th>
+              <th>Receiver</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Fraud</th>
+              <th>Risk</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for txn in transactions %}
+            <tr class="{{ 'table-danger' if txn.fraud_prediction=='Fraud' }}">
+              <td class="ps-4 text-muted small">{{ txn.timestamp.strftime('%d %b %Y, %H:%M') if txn.timestamp }}</td>
+              <td class="fw-semibold small">{{ txn.sender_name }}</td>
+              <td class="small">{{ txn.receiver_name }}</td>
+              <td class="fw-bold text-primary">₹{{ "{:,.0f}".format(txn.amount) }}</td>
+              <td><span class="badge bg-secondary">{{ txn.transaction_type }}</span></td>
+              <td>
+                <span class="badge bg-{{ 'danger' if txn.fraud_prediction=='Fraud' else 'success' }}">
+                  <i class="bi bi-{{ 'exclamation-triangle' if txn.fraud_prediction=='Fraud' else 'check-circle' }} me-1"></i>{{ txn.fraud_prediction }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress" style="width:50px;height:6px;">
+                    <div class="progress-bar bg-{{ 'success' if txn.risk_score < 35 else 'warning' if txn.risk_score < 60 else 'danger' }}" style="width:{{ txn.risk_score }}%"></div>
+                  </div>
+                  <span class="small">{{ "%.0f"|format(txn.risk_score) }}</span>
+                </div>
+              </td>
+              <td><span class="badge bg-{{ 'success' if txn.status=='Completed' else 'warning text-dark' if txn.status=='Pending' else 'danger' }}">{{ txn.status }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if pages > 1 %}
+      <nav class="px-4 py-3">
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+          {% for p in range(1, pages+1) %}
+          <li class="page-item {{ 'active' if p==page }}">
+            <a class="page-link" href="{{ url_for('admin.transactions', page=p, **filters) }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

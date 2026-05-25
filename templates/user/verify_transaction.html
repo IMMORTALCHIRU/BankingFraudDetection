@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Verify Transaction — BankGuard{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-4{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:540px;">
+  <div class="card border-0 overflow-hidden" style="border-radius:1.5rem;box-shadow:var(--shadow-xl);">
+
+    <!-- Dark danger header -->
+    <div class="text-white text-center py-5 px-4 position-relative" style="background:linear-gradient(135deg,#7f1d1d,#991b1b,#b91c1c);">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,100,100,0.2) 0%,transparent 70%);"></div>
+      <div class="position-relative" style="z-index:2;">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:50%;backdrop-filter:blur(10px);">
+          <i class="bi bi-exclamation-octagon-fill" style="font-size:1.9rem;"></i>
+        </div>
+        <h4 class="fw-black mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Suspicious Transaction Detected</h4>
+        <p style="opacity:0.75;font-size:0.875rem;margin:0;">OTP verification required to proceed</p>
+      </div>
+    </div>
+
+    <div class="card-body p-4 p-md-5 bg-white">
+
+      {% if txn %}
+      <!-- Transaction summary -->
+      <div class="rounded-4 p-4 mb-4" style="background:#fff5f5;border:1.5px solid #fecaca;">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Amount</div>
+            <div class="fw-black text-danger" style="font-size:1.4rem;">₹{{ "{:,.2f}".format(txn.amount) }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Receiver</div>
+            <div class="fw-bold small">{{ txn.receiver_name }}</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Risk Score</div>
+            <div class="fw-bold small {% if txn.risk_score >= 60 %}text-danger{% elif txn.risk_score >= 35 %}text-warning{% else %}text-success{% endif %}">
+              {{ "%.1f"|format(txn.risk_score) }} / 100
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Confidence</div>
+            <div class="fw-bold small">{{ "%.1f"|format(txn.confidence) }}%</div>
+          </div>
+          <div class="col-12">
+            <div class="text-muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">ML Prediction</div>
+            <div class="fw-bold text-danger small mt-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>{{ txn.fraud_prediction }}</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Countdown -->
+      <div class="d-flex align-items-center gap-2 rounded-3 px-3 py-2 mb-4" style="background:#fffbeb;border:1px solid #fde68a;">
+        <i class="bi bi-clock-fill text-warning"></i>
+        <span class="small">OTP expires in <strong id="txnCountdown" class="text-danger">1:00</strong>. If expired, transaction will be <strong>auto-frozen</strong>.</span>
+      </div>
+
+      <form method="POST" action="{{ url_for('transactions.verify_transaction') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="mb-4 text-center">
+          <label class="form-label fw-semibold mb-3 d-block">Enter OTP from Email</label>
+          <div class="d-flex justify-content-center gap-2">
+            <input type="text" class="form-control otp-box text-center fw-black" maxlength="1" id="otp1" style="font-size:1.5rem;"/>
+            <input type="text" class="form-control otp-box text-center fw-black" maxlength="1" id="otp2" style="font-size:1.5rem;"/>
+            <input type="text" class="form-control otp-box text-center fw-black" maxlength="1" id="otp3" style="font-size:1.5rem;"/>
+            <input type="text" class="form-control otp-box text-center fw-black" maxlength="1" id="otp4" style="font-size:1.5rem;"/>
+          </div>
+          <input type="hidden" name="otp" id="otpHidden"/>
+        </div>
+        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold rounded-pill mb-3">
+          <i class="bi bi-shield-check me-2"></i>Verify & Complete Transaction
+        </button>
+        <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-secondary w-100 rounded-pill">
+          <i class="bi bi-x-circle me-2"></i>Cancel Transaction
+        </a>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const boxes = ['otp1','otp2','otp3','otp4'];
+boxes.forEach((id,i) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    if (el.value && i < 3) document.getElementById(boxes[i+1]).focus();
+    document.getElementById('otpHidden').value = boxes.map(b => document.getElementById(b).value).join('');
+  });
+  el.addEventListener('keydown', (e) => { if (e.key==='Backspace' && !el.value && i>0) document.getElementById(boxes[i-1]).focus(); });
+});
+let secs = 60;
+const countEl = document.getElementById('txnCountdown');
+const timer = setInterval(() => {
+  secs--;
+  if (secs <= 0) { clearInterval(timer); countEl.textContent = 'Expired'; return; }
+  countEl.textContent = `0:${secs.toString().padStart(2,'0')}`;
+}, 1000);
+</script>
+{% endblock %}

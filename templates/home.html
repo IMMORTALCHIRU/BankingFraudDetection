@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+{% block title %}BankGuard — AI-Powered Banking Fraud Detection{% endblock %}
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<section class="hero-section" id="home">
+  <div class="hero-bg-animated"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row align-items-center min-vh-100 g-5 py-5">
+      <div class="col-lg-6 text-white">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-4" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);">
+          <span class="text-warning" style="font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;">✦ AI-Powered Security Platform</span>
+        </div>
+        <h1 class="fw-black lh-1 mb-4" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(2.4rem,5vw,3.6rem);">
+          Protect Your<br/>
+          <span class="text-gradient-gold">Banking</span><br/>
+          With AI Intelligence
+        </h1>
+        <p class="mb-5 text-white" style="opacity:0.72;font-size:1.08rem;line-height:1.7;max-width:480px;">
+          BankGuard uses XGBoost & Random Forest ML models to detect fraud in real-time,
+          keeping every rupee safe with 99.9% accuracy.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg fw-bold px-5 rounded-pill shadow-lg">
+            <i class="bi bi-person-plus-fill me-2"></i>Open Free Account
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-lg px-5 rounded-pill fw-semibold" style="background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);color:#fff;backdrop-filter:blur(8px);">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </a>
+        </div>
+        <div class="row g-3">
+          {% for val, label in [('99%','Detection'),('50K+','Transactions'),('24/7','Monitoring'),('<100ms','Response')] %}
+          <div class="col-3">
+            <div class="hero-stat text-center">
+              <div class="fw-black text-warning mb-1" style="font-size:1.3rem;font-family:'Plus Jakarta Sans',sans-serif;">{{ val }}</div>
+              <div style="font-size:0.68rem;opacity:0.65;text-transform:uppercase;letter-spacing:0.06em;">{{ label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-flex flex-column gap-4 align-items-center justify-content-center">
+        <div class="hero-card-float rounded-4 w-100" style="max-width:380px;">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="icon-circle bg-success" style="width:44px;height:44px;"><i class="bi bi-shield-check text-white"></i></div>
+            <div>
+              <div class="fw-bold text-white" style="font-size:0.95rem;">Transaction Secured</div>
+              <div class="text-success" style="font-size:0.78rem;">✓ AI analysis complete — No fraud</div>
+            </div>
+            <span class="ms-auto badge bg-success px-2 py-1">Safe</span>
+          </div>
+          <div class="rounded-3 p-3" style="background:rgba(0,0,0,0.3);">
+            {% for label, value, color in [('Amount','₹25,000.00','text-white'),('Risk Score','8 / 100','text-success'),('Fraud Prob.','2.7%','text-success'),('Confidence','97.3%','text-warning')] %}
+            <div class="d-flex justify-content-between {{ 'mb-2' if not loop.last }}">
+              <span style="font-size:0.8rem;opacity:0.6;color:#fff;">{{ label }}</span>
+              <span class="fw-bold {{ color }}" style="font-size:0.85rem;">{{ value }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="d-flex gap-3 w-100" style="max-width:380px;">
+          <div class="hero-card-float-2 rounded-3 flex-fill">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-graph-up-arrow text-warning fs-5"></i>
+              <div>
+                <div class="text-white fw-bold" style="font-size:0.8rem;">Fraud Blocked</div>
+                <div class="text-warning fw-black" style="font-size:1.1rem;">₹8,50,000</div>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-3 p-3 flex-fill d-flex align-items-center gap-2">
+            <div class="icon-circle-sm bg-primary-soft"><i class="bi bi-cpu-fill text-primary"></i></div>
+            <div>
+              <div class="text-white fw-bold" style="font-size:0.8rem;">ML Model</div>
+              <div class="text-success" style="font-size:0.8rem;">● Live</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-down text-center pb-4" style="opacity:0.5;">
+    <div style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:#fff;margin-bottom:4px;">Scroll</div>
+    <i class="bi bi-chevron-compact-down text-white fs-5"></i>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══════════════════════════════════════════════════ -->
+<section id="about" class="py-7 bg-white">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <div class="position-relative">
+          <div class="about-bg-circle"></div>
+          <div class="glass-dark rounded-4 p-4" style="background:linear-gradient(135deg,#0f172a,#1e293b);">
+            <div class="d-flex align-items-center gap-3 mb-4">
+              <div class="icon-circle-lg bg-primary-soft"><i class="bi bi-cpu fs-3 text-primary"></i></div>
+              <div>
+                <div class="fw-bold text-white">ML Engine Status</div>
+                <div class="d-flex align-items-center gap-1 text-success" style="font-size:0.8rem;">
+                  <span style="width:7px;height:7px;background:var(--success);border-radius:50%;display:inline-block;animation:pulse1 2s infinite;"></span> Live & Processing
+                </div>
+              </div>
+            </div>
+            <div class="row g-3 text-center">
+              {% for v, l in [('100%','Classification Accuracy'),('0.996','R² Risk Score'),('XGBoost','Best Model'),('12','Features Used')] %}
+              <div class="col-6">
+                <div class="rounded-3 p-3" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);">
+                  <div class="text-warning fw-black fs-5" style="font-family:'Plus Jakarta Sans',sans-serif;">{{ v }}</div>
+                  <div class="text-white-50" style="font-size:0.72rem;">{{ l }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="section-label mb-3">About BankGuard</div>
+        <div class="section-line"></div>
+        <h2 class="fw-black mb-4" style="font-size:2.4rem;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.15;">Next-Generation<br/><span class="text-gradient">Fraud Protection</span></h2>
+        <p class="text-muted mb-4" style="font-size:1rem;line-height:1.75;">
+          BankGuard combines cutting-edge Machine Learning with enterprise-grade banking infrastructure to deliver real-time fraud detection, intelligent risk scoring, and automated alerts — all in milliseconds.
+        </p>
+        <div class="row g-3">
+          {% for icon, color, title, desc in [
+            ('bi-brain','primary','XGBoost + Random Forest','Dual-model ensemble for maximum accuracy'),
+            ('bi-lightning-charge','success','Real-Time Detection','Sub-second fraud analysis per transaction'),
+            ('bi-graph-up','warning','Risk Scoring Engine','Dynamic 0-100 risk score per transaction'),
+            ('bi-shield-exclamation','danger','Instant Alerts','Email + OTP for suspicious activity')
+          ] %}
+          <div class="col-sm-6">
+            <div class="d-flex align-items-start gap-3 p-3 rounded-3 hover-lift-sm" style="border:1.5px solid var(--border);background:#fff;">
+              <div class="icon-badge bg-{{ color }}-soft flex-shrink-0"><i class="bi {{ icon }} text-{{ color }} fs-5"></i></div>
+              <div>
+                <div class="fw-semibold" style="font-size:0.9rem;">{{ title }}</div>
+                <div class="text-muted" style="font-size:0.78rem;">{{ desc }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ════════════════════════════════════════════════ -->
+<section id="features" class="py-7" style="background:var(--body-bg);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label mb-3">Key Features</div>
+      <div class="section-line-center"></div>
+      <h2 class="fw-black mb-3" style="font-size:2.3rem;font-family:'Plus Jakarta Sans',sans-serif;">Everything You Need for<br/><span class="text-gradient">Secure Banking</span></h2>
+    </div>
+    <div class="row g-4">
+      {% for icon, color, title, desc in [
+        ('bi-shield-lock-fill','primary','Advanced Fraud Detection','ML-powered real-time fraud analysis on every transaction with 99%+ accuracy.'),
+        ('bi-bar-chart-line-fill','success','Analytics Dashboard','Visual insights into spending patterns, fraud trends, and account health.'),
+        ('bi-envelope-check-fill','warning','OTP Verification','Mandatory OTP for high-value transactions and suspicious activity.'),
+        ('bi-person-check-fill','info','Secure Authentication','Password hashing, session management, and new login alerts.'),
+        ('bi-clock-history','danger','Transaction History','Complete audit trail with fraud labels, risk scores, and full details.'),
+        ('bi-chat-dots-fill','secondary','Complaint Management','Raise and track complaints with full admin visibility.'),
+        ('bi-bell-fill','primary','Smart Notifications','Real-time security and transaction alerts delivered to your inbox.'),
+        ('bi-graph-up-arrow','success','Risk Scoring','Dynamic 0-100 risk score computed per transaction for granular control.'),
+        ('bi-phone-fill','warning','Mobile Responsive','Fully responsive design for secure banking on any device.')
+      ] %}
+      <div class="col-lg-4 col-md-6">
+        <div class="feature-card card border-0 shadow-sm h-100 hover-lift">
+          <div class="card-body p-4">
+            <div class="icon-badge bg-{{ color }}-soft mb-3">
+              <i class="bi {{ icon }} text-{{ color }} fs-4"></i>
+            </div>
+            <h6 class="fw-bold mb-2">{{ title }}</h6>
+            <p class="text-muted mb-0" style="font-size:0.875rem;line-height:1.65;">{{ desc }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ════════════════════════════════════════════ -->
+<section id="how-it-works" class="py-7" style="background:var(--grad-hero);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%, rgba(79,70,229,0.2) 0%, transparent 55%),radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.12) 0%, transparent 50%);"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 text-white">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);">
+          <span class="text-warning" style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">AI Detection Flow</span>
+        </div>
+        <div class="section-line" style="background:var(--grad-warning);"></div>
+        <h2 class="fw-black mb-5" style="font-size:2.3rem;font-family:'Plus Jakarta Sans',sans-serif;">Fraud Detection<br/><span class="text-gradient-gold">In 3 Steps</span></h2>
+        {% for num, title, desc in [
+          ('1','Transaction Submitted','You initiate a transfer or withdrawal. 12 key features are extracted instantly by the ML pipeline.'),
+          ('2','ML Model Analysis','XGBoost & Random Forest predict fraud probability and risk score in milliseconds.'),
+          ('3','Automated Response','Normal → processed instantly. Suspicious → OTP verification required before completion.')
+        ] %}
+        <div class="d-flex gap-4 {{ 'mb-4' if not loop.last }}">
+          <div class="step-num flex-shrink-0" style="background:var(--grad-warning);">{{ num }}</div>
+          <div>
+            <h5 class="fw-bold text-white mb-1">{{ title }}</h5>
+            <p class="mb-0" style="color:rgba(255,255,255,0.65);font-size:0.9rem;line-height:1.65;">{{ desc }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          {% for icon, title, desc in [
+            ('bi-clock','Transaction Time','Hour-based risk assessment'),
+            ('bi-currency-rupee','Transaction Amount','Deviation from 30-day average'),
+            ('bi-geo-alt-fill','Location Change','Current vs previous city check'),
+            ('bi-speedometer','Transaction Frequency','Transactions per 10 minutes'),
+            ('bi-calendar-check','Account Age','New accounts carry higher risk'),
+            ('bi-key-fill','Failed Login Attempts','Unauthorized access detection')
+          ] %}
+          <div class="col-6">
+            <div class="ml-feature-card rounded-3">
+              <i class="bi {{ icon }} text-warning fs-4 mb-2 d-block"></i>
+              <div class="fw-semibold text-white mb-1" style="font-size:0.85rem;">{{ title }}</div>
+              <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);">{{ desc }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS BANNER ════════════════════════════════════════════ -->
+<section class="py-5" style="background:var(--grad-primary);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.08) 0%,transparent 70%);"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row g-4 text-center text-white">
+      {% for icon, val, label in [
+        ('bi-shield-check-fill','99%','Fraud Detection'),
+        ('bi-people-fill','10,000+','Protected Users'),
+        ('bi-currency-rupee','₹50Cr+','Fraud Prevented'),
+        ('bi-lightning-fill','<100ms','Detection Speed')
+      ] %}
+      <div class="col-6 col-lg-3">
+        <div class="py-2">
+          <i class="bi {{ icon }} fs-2 text-warning d-block mb-2"></i>
+          <div class="fw-black mb-1" style="font-size:2rem;font-family:'Plus Jakarta Sans',sans-serif;">{{ val }}</div>
+          <div style="font-size:0.82rem;opacity:0.75;">{{ label }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ SERVICES ════════════════════════════════════════════════ -->
+<section class="py-7 bg-white">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label mb-3">Banking Services</div>
+      <div class="section-line-center"></div>
+      <h2 class="fw-black mb-3" style="font-size:2.3rem;font-family:'Plus Jakarta Sans',sans-serif;">Secure <span class="text-gradient">Banking Services</span></h2>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for icon, title, desc, btn_class, featured in [
+        ('bi-arrow-down-circle-fill','Deposit Money','Safely deposit funds with instant ML-verified transaction recording and email confirmation.','btn-outline-primary',false),
+        ('bi-arrow-left-right','Money Transfer','Real-time AI-powered fund transfers. OTP required for suspicious transactions for maximum security.','btn-warning',true),
+        ('bi-bar-chart-fill','Smart Analytics','Visualize spending patterns, fraud trends, and risk distributions with interactive charts.','btn-outline-primary',false)
+      ] %}
+      <div class="col-md-4">
+        <div class="card h-100 border-0 text-center hover-lift {{ 'text-white' if featured else '' }}" style="{{ 'background:var(--grad-primary);' if featured else 'border:1.5px solid var(--border)!important;' }}padding:2.5rem 2rem;">
+          <div class="mb-4">
+            <div class="icon-badge-lg mx-auto {{ 'bg-white-soft' if featured else 'bg-primary-soft' }}" style="{{ 'background:rgba(255,255,255,0.15)!important;' if featured else '' }}">
+              <i class="bi {{ icon }} {{ 'text-white' if featured else 'text-primary' }} fs-3"></i>
+            </div>
+          </div>
+          <h5 class="fw-bold mb-3">{{ title }}</h5>
+          <p class="{{ 'text-muted' if not featured else '' }}" style="{{ 'opacity:.75;' if featured else '' }}font-size:0.9rem;line-height:1.7;">{{ desc }}</p>
+          <div class="mt-auto pt-3">
+            <a href="{{ url_for('auth.register') }}" class="btn {{ btn_class }} rounded-pill px-4 fw-semibold">Get Started <i class="bi bi-arrow-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════════ -->
+<section class="py-7" style="background:var(--body-bg);">
+  <div class="container">
+    <div class="rounded-4 p-5 text-center text-white position-relative overflow-hidden" style="background:var(--grad-hero);">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(79,70,229,0.4) 0%,transparent 70%);"></div>
+      <div class="position-relative" style="z-index:2;">
+        <div class="section-label mb-3" style="background:rgba(245,158,11,0.15);color:#fbbf24;border-color:rgba(245,158,11,0.3);">Start Today — It's Free</div>
+        <h2 class="fw-black mb-3" style="font-size:2.2rem;font-family:'Plus Jakarta Sans',sans-serif;">Ready to Secure Your Banking?</h2>
+        <p class="mb-4" style="opacity:0.7;max-width:500px;margin:0 auto 1.5rem;font-size:1rem;">Join thousands of users who trust BankGuard's AI to keep their transactions safe 24/7.</p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg fw-bold px-5 rounded-pill shadow-lg">
+            <i class="bi bi-person-plus-fill me-2"></i>Create Free Account
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-lg px-5 rounded-pill fw-semibold" style="background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);color:#fff;">
+            Sign In <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════════════ -->
+<!-- <footer class="site-footer py-5">
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row g-4 pb-4 mb-4" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="col-lg-4 col-md-6">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="brand-icon"><i class="bi bi-shield-lock-fill fs-6"></i></div>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:#fff;font-size:1.1rem;">Bank<span style="color:var(--primary-light);">Guard</span></span>
+        </div>
+        <p style="font-size:0.85rem;line-height:1.7;color:rgba(255,255,255,0.5);">AI-powered banking fraud detection platform protecting every transaction with machine learning intelligence.</p>
+      </div>
+      <div class="col-lg-2 col-md-3 col-6">
+        <div class="fw-semibold text-white mb-3" style="font-size:0.82rem;">Platform</div>
+        <div class="d-flex flex-column gap-2">
+          <a href="{{ url_for('auth.login') }}" class="footer-link">Sign In</a>
+          <a href="{{ url_for('auth.register') }}" class="footer-link">Register</a>
+          <a href="#features" class="footer-link">Features</a>
+          <a href="#how-it-works" class="footer-link">How It Works</a>
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-3 col-6">
+        <div class="fw-semibold text-white mb-3" style="font-size:0.82rem;">Security</div>
+        <div class="d-flex flex-column gap-2">
+          <span class="footer-link">ML Fraud Detection</span>
+          <span class="footer-link">OTP Verification</span>
+          <span class="footer-link">Risk Scoring</span>
+          <span class="footer-link">24/7 Monitoring</span>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="fw-semibold text-white mb-3" style="font-size:0.82rem;">Trusted Security</div>
+        <div class="d-flex gap-2 flex-wrap">
+          {% for icon, text in [('bi-shield-check','SSL Encrypted'),('bi-lock-fill','OTP Secured'),('bi-cpu-fill','AI Protected'),('bi-bell-fill','24/7 Alerts')] %}
+          <div class="d-flex align-items-center gap-1 px-2 py-1 rounded" style="background:rgba(255,255,255,0.07);font-size:0.72rem;color:rgba(255,255,255,0.65);">
+            <i class="bi {{ icon }} text-success" style="font-size:0.75rem;"></i>{{ text }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">© 2026 BankGuard. All rights reserved.</div>
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);">Secured by XGBoost + Random Forest ML</div>
+    </div>
+  </div>
+</footer> -->
+
+{% endblock %}

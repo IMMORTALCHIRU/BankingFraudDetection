@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Fraud Alerts — Admin{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="admin-page-header mb-4" style="background:linear-gradient(135deg,#1f0a0a,#3b0a0a,#7f1d1d);">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="admin-badge mb-2" style="background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.35);color:#fca5a5;"><i class="bi bi-exclamation-triangle me-1"></i>FRAUD ALERTS</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Fraud Alerts</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">{{ total }} total alerts · Real-time ML detection</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm fw-semibold rounded-pill px-3" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:#fff;">
+          <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+      {% if alerts %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Date & Time</th>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Risk Level</th>
+              <th>Fraud Prob.</th>
+              <th>Risk Score</th>
+              <th>Location</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in alerts %}
+            <tr class="table-{{ 'danger' if a.risk_level|default('Low') in ['High','Critical'] else 'warning' }}">
+              <td class="ps-4 text-muted small">{{ a.timestamp.strftime('%d %b %Y, %H:%M') if a.timestamp else 'N/A' }}</td>
+              <td>
+                <div class="fw-semibold small">{{ a.user_name|default('Unknown') }}</div>
+                <div class="text-muted" style="font-size:.72rem;">{{ a.user_email|default('') }}</div>
+              </td>
+              <td class="fw-bold text-danger">₹{{ "{:,.0f}".format(a.amount|default(0)) }}</td>
+              <td>
+                <span class="badge bg-{{ 'dark' if a.risk_level|default('Low')=='Critical' else 'danger' if a.risk_level|default('Low')=='High' else 'warning text-dark' }}">
+                  {{ a.risk_level|default('Low') }}
+                </span>
+              </td>
+              <td class="fw-bold">{{ "%.1f"|format((a.fraud_probability|default(0)) * 100) }}%</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress" style="width:60px;height:6px;">
+                    <div class="progress-bar bg-danger" style="width:{{ a.risk_score|default(0) }}%"></div>
+                  </div>
+                  <span class="small">{{ "%.0f"|format(a.risk_score|default(0)) }}</span>
+                </div>
+              </td>
+              <td class="small text-muted">{{ a.location or '—' }}</td>
+              <td>
+                <span class="badge bg-{{ 'success' if a.resolved else 'danger' }}">{{ 'Resolved' if a.resolved else 'Active' }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if pages > 1 %}
+      <nav class="px-4 py-3">
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+          {% for p in range(1, pages+1) %}
+          <li class="page-item {{ 'active' if p==page }}">
+            <a class="page-link" href="{{ url_for('admin.fraud_alerts', page=p) }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-shield-check fs-1 text-success d-block mb-3"></i>
+        <h5>No fraud alerts detected</h5>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

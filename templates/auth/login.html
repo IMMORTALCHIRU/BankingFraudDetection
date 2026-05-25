@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Sign In — BankGuard{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-bg-overlay"></div>
+<div class="auth-wrapper">
+  <div class="container-fluid p-0 min-vh-100 d-flex">
+
+    <!-- ── Left Feature Panel (hidden on mobile) ── -->
+    <div class="d-none d-lg-flex col-lg-5 flex-column justify-content-between p-5 position-relative" style="background:var(--grad-hero);">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(79,70,229,0.2) 0%,transparent 55%),radial-gradient(ellipse at 80% 20%,rgba(6,182,212,0.12) 0%,transparent 50%);"></div>
+      <div class="position-relative" style="z-index:2;">
+        <a href="{{ url_for('index') }}" class="d-flex align-items-center gap-2 text-decoration-none mb-5">
+          <div class="brand-icon"><i class="bi bi-shield-lock-fill fs-6"></i></div>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;">Bank<span style="color:var(--primary-light);">Guard</span></span>
+        </a>
+        <h2 class="fw-black text-white mb-3" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;line-height:1.2;">Welcome back to<br/><span class="text-gradient-gold">AI-Secured Banking</span></h2>
+        <p style="color:rgba(255,255,255,0.6);font-size:0.95rem;line-height:1.7;">Your transactions are protected by real-time ML fraud detection with 99% accuracy.</p>
+        <div class="mt-5 d-flex flex-column gap-3">
+          {% for icon, text in [('bi-shield-check-fill','ML fraud detection on every transaction'),('bi-lock-fill','OTP verification for suspicious activity'),('bi-bell-fill','Instant security alerts via email')] %}
+          <div class="d-flex align-items-center gap-3" style="color:rgba(255,255,255,0.75);">
+            <div class="icon-circle-sm bg-primary-soft flex-shrink-0"><i class="bi {{ icon }} text-primary-light" style="font-size:0.85rem;color:var(--primary-light)!important;"></i></div>
+            <span style="font-size:0.875rem;">{{ text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="position-relative" style="z-index:2;">
+        <div class="rounded-3 p-4" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);">
+          <div class="d-flex gap-1 mb-2">
+            <i class="bi bi-star-fill text-warning" style="font-size:0.8rem;"></i>
+            <i class="bi bi-star-fill text-warning" style="font-size:0.8rem;"></i>
+            <i class="bi bi-star-fill text-warning" style="font-size:0.8rem;"></i>
+            <i class="bi bi-star-fill text-warning" style="font-size:0.8rem;"></i>
+            <i class="bi bi-star-fill text-warning" style="font-size:0.8rem;"></i>
+          </div>
+          <!-- <p style="color:rgba(255,255,255,0.75);font-size:0.875rem;font-style:italic;margin-bottom:0.75rem;">"BankGuard caught a fraudulent transfer instantly. The AI alert saved me ₹50,000!"</p>
+          <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">— Priya Sharma, Bengaluru</div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right Login Form ── -->
+    <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center p-4 p-lg-5" style="background:#fff;">
+      <div style="width:100%;max-width:420px;">
+        <a href="{{ url_for('index') }}" class="d-lg-none d-flex align-items-center gap-2 text-decoration-none mb-4">
+          <div class="brand-icon"><i class="bi bi-shield-lock-fill fs-6"></i></div>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1rem;color:var(--dark);">Bank<span style="color:var(--primary);">Guard</span></span>
+        </a>
+        <div class="mb-4">
+          <h3 class="fw-black mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Sign in to your account</h3>
+          <p class="text-muted" style="font-size:0.875rem;">Don't have an account? <a href="{{ url_for('auth.register') }}" class="fw-semibold text-primary text-decoration-none">Create for free</a></p>
+        </div>
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope text-muted"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email"/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <label class="form-label">Password</label>
+              <a href="{{ url_for('auth.forgot_password') }}" class="small text-primary text-decoration-none fw-semibold">Forgot password?</a>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required/>
+              <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('loginPassword',this)"><i class="bi bi-eye text-muted"></i></button>
+            </div>
+          </div>
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe"/>
+              <label class="form-check-label small text-muted" for="rememberMe">Remember me for 2 hours</label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-pill mb-3">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </button>
+        </form>
+        <div class="text-center mt-4">
+          <a href="{{ url_for('index') }}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to Home</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

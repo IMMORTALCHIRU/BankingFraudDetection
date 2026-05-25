@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Complaints — Admin{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="admin-page-header mb-4">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="admin-badge mb-2"><i class="bi bi-chat-dots me-1"></i>COMPLAINTS</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Complaint Management</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">{{ total }} total complaints</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm fw-semibold rounded-pill px-3" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:#fff;">
+          <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if complaints %}
+  <div class="row g-3">
+    {% for c in complaints %}
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-{{ 'success' if c.status=='Resolved' else 'warning text-dark' if c.status=='In Progress' else 'secondary' }}">{{ c.status }}</span>
+                <span class="text-muted small">{{ c.created_at.strftime('%d %b %Y') if c.created_at }}</span>
+                <span class="fw-semibold small">{{ c.user_name }} ({{ c.user_email }})</span>
+              </div>
+              <h6 class="fw-bold mb-1">{{ c.subject }}</h6>
+              <p class="text-muted small mb-2">{{ c.description }}</p>
+              {% if c.txn_ref %}<div class="text-muted small mb-2"><i class="bi bi-link-45deg me-1"></i>Txn: <span class="font-monospace">{{ c.txn_ref }}</span></div>{% endif %}
+              {% if c.admin_reply %}
+              <div class="alert alert-success small py-2 mb-0">
+                <i class="bi bi-reply me-2"></i><strong>Admin:</strong> {{ c.admin_reply }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="flex-shrink-0">
+              <button class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="collapse"
+                      data-bs-target="#reply{{ loop.index }}">
+                <i class="bi bi-reply me-1"></i>Reply
+              </button>
+            </div>
+          </div>
+          <!-- Reply Form -->
+          <div class="collapse mt-3" id="reply{{ loop.index }}">
+            <form method="POST" action="{{ url_for('admin.update_complaint', complaint_id=c._id|string) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <select name="status" class="form-select form-select-sm">
+                    {% for s in ['Pending','In Progress','Resolved'] %}
+                    <option value="{{ s }}" {{ 'selected' if c.status==s }}>{{ s }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-8">
+                  <input type="text" name="admin_reply" class="form-control form-control-sm"
+                         placeholder="Admin reply…" value="{{ c.admin_reply or '' }}"/>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-sm btn-success rounded-pill">
+                    <i class="bi bi-save me-1"></i>Update
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-chat-square-text fs-1 d-block mb-3"></i>
+    <h5>No complaints</h5>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

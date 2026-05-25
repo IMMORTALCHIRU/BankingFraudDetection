@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Receipt #{{ txn.transaction_id[:10] }} — BankGuard{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-4{% endblock %}
+{% block content %}
+<div class="container py-4 no-print" style="max-width:640px;">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ url_for('transactions.history') }}" class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-arrow-left"></i></a>
+    <h4 class="fw-black mb-0" style="font-family:'Plus Jakarta Sans',sans-serif;">Transaction Receipt</h4>
+    <button onclick="window.print()" class="btn btn-sm btn-primary rounded-pill ms-auto"><i class="bi bi-printer me-2"></i>Print</button>
+  </div>
+</div>
+
+<div class="container pb-5" style="max-width:640px;" id="receiptCard">
+  <div class="card border-0 overflow-hidden" style="border-radius:1.5rem;box-shadow:var(--shadow-xl);">
+
+    <!-- Header -->
+    <div class="text-white text-center py-5 px-4 position-relative"
+         style="background:{% if txn.fraud_prediction=='Fraud' %}linear-gradient(135deg,#7f1d1d,#b91c1c){% else %}linear-gradient(135deg,#14532d,#16a34a){% endif %};">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.12) 0%,transparent 70%);"></div>
+      <div class="position-relative" style="z-index:2;">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:72px;height:72px;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);border-radius:50%;">
+          <i class="bi bi-{{ 'exclamation-octagon' if txn.fraud_prediction=='Fraud' else 'check-circle' }}-fill" style="font-size:1.9rem;"></i>
+        </div>
+        <div class="display-6 fw-black mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">₹{{ "{:,.2f}".format(txn.amount) }}</div>
+        <div style="opacity:0.75;font-size:0.875rem;">{{ txn.transaction_type }} · {{ txn.timestamp.strftime('%d %b %Y at %I:%M %p') if txn.timestamp }}</div>
+        <div class="mt-2">
+          <span class="badge" style="background:rgba(255,255,255,0.2);font-size:0.85rem;padding:0.4rem 1rem;border-radius:2rem;">
+            {{ txn.fraud_prediction }} · {{ txn.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="card-body p-4 p-md-5 bg-white">
+
+      <h6 class="fw-bold text-muted text-uppercase" style="font-size:0.72rem;letter-spacing:0.08em;">Transaction Details</h6>
+      <div class="mb-4 mt-2">
+        {% set rows = [
+          ("Transaction ID", txn.transaction_id),
+          ("Sender", txn.sender_name),
+          ("Receiver", txn.receiver_name + " (" + txn.receiver_account + ")"),
+          ("Transaction Type", txn.transaction_type),
+          ("Location", txn.current_location),
+          ("Status", txn.status),
+        ] %}
+        {% for label, value in rows %}
+        <div class="d-flex justify-content-between py-3" style="border-bottom:1px solid #f1f5f9;">
+          <span class="text-muted small">{{ label }}</span>
+          <span class="fw-semibold small text-end" style="max-width:60%;">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if txn.fraud_prediction %}
+      <h6 class="fw-bold text-muted text-uppercase mb-3 mt-4" style="font-size:0.72rem;letter-spacing:0.08em;">ML Risk Analysis</h6>
+      <div class="rounded-4 p-4" style="background:{% if txn.fraud_prediction=='Fraud' %}#fff5f5;border:1.5px solid #fecaca{% else %}#f0fdf4;border:1.5px solid #bbf7d0{% endif %};">
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;">Prediction</div>
+            <span class="badge mt-1 bg-{{ 'danger' if txn.fraud_prediction=='Fraud' else 'success' }}">{{ txn.fraud_prediction }}</span>
+          </div>
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;">Risk Score</div>
+            <div class="fw-black mt-1 text-{{ 'danger' if txn.risk_score >= 60 else 'warning' if txn.risk_score >= 35 else 'success' }}">{{ "%.1f"|format(txn.risk_score) }} / 100</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;">Fraud Probability</div>
+            <div class="fw-bold mt-1">{{ "%.1f"|format(txn.fraud_probability * 100) }}%</div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mb-1 small">
+          <span class="text-muted">Risk Level</span>
+          <span class="fw-semibold">{{ "Low" if txn.risk_score < 35 else "Medium" if txn.risk_score < 60 else "High" if txn.risk_score < 80 else "Critical" }}</span>
+        </div>
+        <div class="progress" style="height:8px;border-radius:99px;">
+          <div class="progress-bar bg-{{ 'success' if txn.risk_score < 35 else 'warning' if txn.risk_score < 60 else 'danger' }}"
+               style="width:{{ txn.risk_score }}%;border-radius:99px;"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if txn.notes %}
+      <div class="mt-4 pt-3 border-top">
+        <div class="text-muted small fw-semibold mb-1">Notes</div>
+        <div class="small">{{ txn.notes }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Footer -->
+      <div class="text-center mt-5 pt-3 border-top">
+        <div class="d-flex align-items-center justify-content-center gap-2 text-muted small">
+          <i class="bi bi-shield-check text-primary"></i>
+          <span>BankGuard — ML-Powered Fraud Detection</span>
+        </div>
+        {% if txn.timestamp %}
+        <div class="text-muted mt-1" style="font-size:0.75rem;">{{ txn.timestamp.strftime('%d %b %Y, %I:%M %p') }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

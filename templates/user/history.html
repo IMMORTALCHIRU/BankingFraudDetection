@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Transaction History — BankGuard{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="page-header mb-4">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="text-white mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.6;">Transaction</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Transaction History</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">{{ total }} total transactions</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('transactions.export_csv') }}" class="btn btn-success btn-sm fw-semibold rounded-pill px-3">
+          <i class="bi bi-download me-1"></i>Export CSV
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search receiver / txn ID"
+               value="{{ filters.search or '' }}"/>
+      </div>
+      <div class="col-md-2">
+        <select name="txn_type" class="form-select">
+          <option value="">All Types</option>
+          {% for t in ['Deposit','Transfer','Withdrawal'] %}
+          <option value="{{ t }}" {{ 'selected' if filters.txn_type==t }}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          {% for s in ['Completed','Verified','Pending','Fraud','Flagged'] %}
+          <option value="{{ s }}" {{ 'selected' if filters.status==s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="fraud" class="form-select">
+          <option value="">All Predictions</option>
+          <option value="Fraud" {{ 'selected' if filters.fraud=='Fraud' }}>Fraud</option>
+          <option value="Normal" {{ 'selected' if filters.fraud=='Normal' }}>Normal</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel"></i></button>
+        <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+      {% if transactions %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Date</th>
+              <th>Txn ID</th>
+              <th>Receiver</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Risk Score</th>
+              <th>Fraud</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for txn in transactions %}
+            <tr>
+              <td class="ps-4 text-muted small">{{ txn.timestamp.strftime('%d %b %Y') }}</td>
+              <td class="font-monospace text-muted small">{{ txn.transaction_id[:12] }}…</td>
+              <td class="fw-semibold small">{{ txn.receiver_name }}</td>
+              <td class="fw-bold text-primary">₹{{ "{:,.0f}".format(txn.amount) }}</td>
+              <td><span class="badge bg-{{ 'success' if txn.transaction_type=='Deposit' else 'primary' if txn.transaction_type=='Transfer' else 'warning text-dark' }}-soft">{{ txn.transaction_type }}</span></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress" style="width:60px;height:6px;">
+                    <div class="progress-bar bg-{{ 'success' if txn.risk_score < 35 else 'warning' if txn.risk_score < 60 else 'danger' }}" style="width:{{ txn.risk_score }}%"></div>
+                  </div>
+                  <span class="small">{{ "%.0f"|format(txn.risk_score) }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-{{ 'danger' if txn.fraud_prediction=='Fraud' else 'success' }}">
+                  <i class="bi bi-{{ 'exclamation-triangle' if txn.fraud_prediction=='Fraud' else 'check-circle' }} me-1"></i>{{ txn.fraud_prediction }}
+                </span>
+              </td>
+              <td><span class="badge bg-{{ 'success' if txn.status=='Completed' else 'info' if txn.status=='Verified' else 'warning text-dark' if txn.status=='Pending' else 'danger' }}">{{ txn.status }}</span></td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{{ url_for('transactions.receipt', txn_id=txn.transaction_id) }}" class="btn btn-xs btn-outline-primary" title="Receipt"><i class="bi bi-receipt"></i></a>
+                  <a href="{{ url_for('transactions.feedback', txn_id=txn.transaction_id) }}" class="btn btn-xs btn-outline-secondary" title="Feedback"><i class="bi bi-star"></i></a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      {% if pages > 1 %}
+      <nav class="px-4 py-3">
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+          {% if page > 1 %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('transactions.history', page=page-1, **filters) }}">&laquo;</a></li>
+          {% endif %}
+          {% for p in range(1, pages+1) %}
+          <li class="page-item {{ 'active' if p==page }}">
+            <a class="page-link" href="{{ url_for('transactions.history', page=p, **filters) }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+          {% if page < pages %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('transactions.history', page=page+1, **filters) }}">&raquo;</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+      {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>No transactions found.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

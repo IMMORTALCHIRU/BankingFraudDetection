@@ -1,3 +1,13 @@
-numpy
+flask
+flask-login
+flask-mail
+flask-wtf
+pymongo
+werkzeug
+python-dotenv
 pandas
+numpy
+scikit-learn
+xgboost
+joblib
 faker

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Manage Users — Admin{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-4">
+  <div class="admin-page-header mb-4">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="admin-badge mb-2"><i class="bi bi-people me-1"></i>USER MANAGEMENT</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">User Management</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">{{ total }} registered users</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm fw-semibold rounded-pill px-3" style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);color:#fff;">
+          <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <input type="text" name="search" class="form-control" placeholder="Search by name, email or account number"
+               value="{{ search or '' }}"/>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          <option value="Active" {{ 'selected' if status=='Active' }}>Active</option>
+          <option value="Frozen" {{ 'selected' if status=='Frozen' }}>Frozen</option>
+          <option value="Unverified" {{ 'selected' if status=='Unverified' }}>Unverified</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel"></i></button>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">User</th>
+              <th>Account</th>
+              <th>Balance</th>
+              <th>Joined</th>
+              <th>Txns</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar-circle" style="width:36px;height:36px;font-size:0.85rem;">{{ u.full_name[0].upper() }}</div>
+                  <div>
+                    <div class="fw-semibold small">{{ u.full_name }}</div>
+                    <div class="text-muted" style="font-size:0.75rem;">{{ u.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="font-monospace small text-muted">{{ u.account_number }}</td>
+              <td class="fw-bold text-primary small">₹{{ "{:,.0f}".format(u.balance or 0) }}</td>
+              <td class="text-muted small">{{ u.created_at.strftime('%d %b %Y') if u.created_at }}</td>
+              <td class="text-muted small">{{ u.txn_count or 0 }}</td>
+              <td>
+                {% if u.account_status == "Unverified" %}
+                  <span class="badge bg-warning text-dark">Unverified</span>
+                {% elif u.account_status == "Frozen" %}
+                  <span class="badge bg-danger">Frozen</span>
+                {% else %}
+                  <span class="badge bg-success">Active</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{{ url_for('admin.user_detail', user_id=u._id|string) }}" class="btn btn-xs btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                  <form method="POST" action="{{ url_for('admin.freeze_user', user_id=u._id|string) }}" class="d-inline" onsubmit="return confirm('Confirm freeze/unfreeze?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-xs btn-outline-{{ 'success' if u.account_status=='Frozen' else 'warning' }}" title="{{ 'Unfreeze' if u.account_status=='Frozen' else 'Freeze' }}">
+                      <i class="bi bi-{{ 'unlock' if u.account_status=='Frozen' else 'lock' }}"></i>
+                    </button>
+                  </form>
+                  {% if not u.is_admin %}
+                  <form method="POST" action="{{ url_for('admin.delete_user', user_id=u._id|string) }}" class="d-inline" onsubmit="return confirm('Permanently delete user?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-xs btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      {% if pages > 1 %}
+      <nav class="px-4 py-3">
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+          {% for p in range(1, pages+1) %}
+          <li class="page-item {{ 'active' if p==page }}">
+            <a class="page-link" href="{{ url_for('admin.users', page=p, search=search, status=status) }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}My Complaints — BankGuard{% endblock %}
+{% block body_class %}app-page{% endblock %}
+{% block main_class %}pt-5 mt-2{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="page-header mb-4">
+    <div class="row align-items-center g-3 position-relative" style="z-index:2;">
+      <div class="col-md-7">
+        <div class="text-white mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.6;">Support</div>
+        <h4 class="fw-black text-white mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">My Complaints</h4>
+        <div class="text-white" style="font-size:0.78rem;opacity:0.55;">Track all your support requests</div>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('complaints.new_complaint') }}" class="btn btn-warning btn-sm fw-semibold rounded-pill px-3">
+          <i class="bi bi-plus-circle me-1"></i>New Complaint
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if complaints %}
+  <div class="row g-3">
+    {% for c in complaints %}
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4 hover-lift">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-{{ 'success' if c.status=='Resolved' else 'warning text-dark' if c.status=='In Progress' else 'secondary' }}">
+                  <i class="bi bi-{{ 'check-circle' if c.status=='Resolved' else 'clock' if c.status=='In Progress' else 'hourglass' }} me-1"></i>{{ c.status }}
+                </span>
+                <span class="text-muted small">{{ c.created_at.strftime('%d %b %Y') if c.created_at }}</span>
+              </div>
+              <h6 class="fw-bold mb-1">{{ c.subject }}</h6>
+              <p class="text-muted small mb-2">{{ c.description[:120] }}{% if c.description|length > 120 %}…{% endif %}</p>
+              {% if c.txn_ref %}
+              <div class="text-muted small"><i class="bi bi-link-45deg me-1"></i>Txn Ref: <span class="font-monospace">{{ c.txn_ref }}</span></div>
+              {% endif %}
+              {% if c.admin_reply %}
+              <div class="alert alert-success py-2 small mt-3 mb-0">
+                <i class="bi bi-reply me-2"></i><strong>Admin Reply:</strong> {{ c.admin_reply }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-chat-square-text fs-1 d-block mb-3"></i>
+    <h5>No complaints raised yet</h5>
+    <p class="small">If you notice any suspicious activity, <a href="{{ url_for('complaints.new_complaint') }}">raise a complaint</a>.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
